@@ -7,10 +7,15 @@
 #define TRUE			(1)
 #define FALSE			(!TRUE)
 
-
+enum digits_enum
+{
+	ONES = 0,
+	TENS,
+	HUNDREDS,
+	THOUSANDS,
+};
 
 int convert(int decimal_in, char *out_string);
 
 void test_all(void);
-
-#endiff
+#endif

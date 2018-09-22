@@ -33,27 +33,55 @@ static const char *tens[] =
 };
 
 
-static int handle_ones(int input, const char **output)
+static const char *hundreds[] =
 {
+	"",
+	"C",
+	"CC",
+	"CCC",
+	"CD",
+	"D",
+	"DC",
+	"DCC",
+	"DCCC",
+	"CM",
+};
+
+
+static const char *thousands[] =
+{
+	"",
+	"M",
+	"MM",
+	"MMM",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+};
+
+
+static const char **digits_table[] =
+{
+	ones,
+	tens,
+	hundreds,
+	thousands
+};
+
+
+static int handle_digits(enum digits_enum digit, int input, const char **output)
+{
+	const char **table = NULL;
 	if ((input > 10) || (input < 0)) {
-		printf("%s invalid input %d", __FUNCTION__, input);
+		printf("%s invalid input %d\n", __FUNCTION__, input);
 		return -1;
 	}
 
-	*output = ones[input];
-
-	return 0;
-}
-
-
-static int handle_tens(int input, const char **output)
-{
-	if ((input > 10) || (input < 0)) {
-		printf("%s invalid input %d", __FUNCTION__, input);
-		return -1;
-	}
-
-	*output = tens[input];
+	table = digits_table[digit];
+	*output = table[input];
 
 	return 0;
 }
@@ -61,23 +89,46 @@ static int handle_tens(int input, const char **output)
 
 int convert(int input, char *out_string)
 {
-	int ones;
-	int tens;
+	int num;
 	/* char build_str[MAX_CHARS]; */
 	const char *ones_str = NULL;
+	const char *tens_str = NULL;
+	const char *hundreds_str = NULL;
+	const char *thousands_str = NULL;
 
-	ones = input % 10;
-	if (handle_ones(ones, &ones_str) != 0) {
+	if (input >= 4000) {
+		/* upper limit for roman numerals */
+		return -2;
+	}
+	if (input < 1) {
+		/* lower limit for roman numerals */
+		return -3;
+	}
+	num = input % 10;
+	if (handle_digits(ONES, num, &ones_str) != 0) {
 		return -1;
 	}
 	
 	/* get only the ones */
-	tens = (input / 10) % 10;
-	if (handle_tens(ones, &ones_str) != 0) {
+	num = (input / 10) % 10;
+	if (handle_digits(TENS, num, &tens_str) != 0) {
 		return -1;
 	}
 
-	memcpy(out_string, ones_str, MAX_CHARS);
+	num = (input /100) % 10;
+	if (handle_digits(HUNDREDS, num, &hundreds_str) != 0) {
+		return -1;
+	}
+
+	num = (input /1000) % 10;
+	if (handle_digits(THOUSANDS, num, &thousands_str) != 0) {
+		return -1;
+	}
+
+	strncpy_s(out_string, MAX_CHARS, thousands_str, MAX_CHARS);
+	strncat_s(out_string, MAX_CHARS, hundreds_str, MAX_CHARS);
+	strncat_s(out_string, MAX_CHARS, tens_str, MAX_CHARS);
+	strncat_s(out_string, MAX_CHARS, ones_str, MAX_CHARS);
 
 	return 0;
 }
@@ -93,7 +144,6 @@ static void run_test(void)
 int main(int argc, char *argv[])
 {
 	run_test();
-	printf("Hello worlds");
 
 	return 0;
 }
