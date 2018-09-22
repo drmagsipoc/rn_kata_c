@@ -143,6 +143,7 @@ static void run_test(void)
 
 int main(int argc, char *argv[])
 {
+	/* this should be located on a unit test file */
 	run_test();
 
 	return 0;
